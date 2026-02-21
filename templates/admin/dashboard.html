@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Admin Dashboard</h1>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="dashboard-container">
+
+        <div class="dashboard-card">
+            <h3>User Management</h3>
+            <a href="/admin/maintain_users" class="dashboard-btn">Maintain Users</a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Vendor Management</h3>
+            <a href="/admin/maintain_vendors" class="dashboard-btn">Maintain Vendors</a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Membership</h3>
+            <a href="/admin/membership_add" class="dashboard-btn">Add Membership</a>
+            <a href="/admin/membership_update" class="dashboard-btn">Update Membership</a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Orders</h3>
+            <a href="/admin/orders" class="dashboard-btn">Manage Orders</a>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

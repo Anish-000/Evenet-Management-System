@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guest List - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>My Guest List</h1>
+        <div>
+            <a href="/user/dashboard" class="back-btn">Dashboard</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+
+        <div class="table-actions">
+            <a href="/user/add_guest" class="primary-btn">
+                Add New Guest
+            </a>
+        </div>
+
+        {% if guests %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guest in guests %}
+                <tr>
+                    <td>{{ guest.guest_name }}</td>
+                    <td>{{ guest.guest_email }}</td>
+                    <td>{{ guest.guest_phone }}</td>
+                    <td>
+                        <a href="/user/update_guest/{{ guest.id }}" class="primary-btn small-btn">Update</a>
+                        <a href="/user/delete_guest/{{ guest.id }}" class="danger-btn small-btn">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="empty-message">No guests added yet.</p>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

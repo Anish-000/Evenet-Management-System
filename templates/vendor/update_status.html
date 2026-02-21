@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Orders - Vendor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Manage Orders</h1>
+        <div>
+            <a href="/vendor/dashboard" class="back-btn">Dashboard</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+
+        {% if orders %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Amount</th>
+                    <th>Current Status</th>
+                    <th>Update Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>₹{{ order.total_amount }}</td>
+                    <td>
+                        <span class="status-badge">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="POST" action="/vendor/update_status/{{ order.id }}" class="inline-form">
+                            <select name="status" class="small-select">
+                                <option value="Received">Received</option>
+                                <option value="Ready for Shipping">Ready for Shipping</option>
+                                <option value="Out for Delivery">Out for Delivery</option>
+                            </select>
+                            <button type="submit" class="primary-btn small-btn">
+                                Update
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="empty-message">No orders available.</p>
+        {% endif %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Checkout</h1>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="form-container">
+
+        <form method="POST" class="styled-form">
+
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="payment_method" required>
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI</option>
+                </select>
+            </div>
+
+            <div class="checkout-summary">
+                <h3>Total Amount: ₹{{ total }}</h3>
+            </div>
+
+            <button type="submit" class="primary-btn">
+                Place Order
+            </button>
+
+        </form>
+
+        <div class="form-links">
+            <a href="/user/cart" class="secondary-btn">Back to Cart</a>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

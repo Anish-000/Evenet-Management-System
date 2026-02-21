@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Membership - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Update Membership</h1>
+        <a href="/admin/dashboard" class="back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="table-container">
+
+        {% if memberships %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in memberships %}
+                <tr>
+                    <td>{{ m.id }}</td>
+                    <td>{{ m.name }}</td>
+                    <td>{{ m.type }}</td>
+                    <td>{{ m.end_date }}</td>
+                    <td>
+                        <span class="status {{ m.status }}">
+                            {{ m.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="POST" class="inline-form">
+                            <input type="hidden" name="membership_id" value="{{ m.id }}">
+
+                            <button type="submit" name="action" value="extend" class="primary-btn small-btn">
+                                Extend 6 Months
+                            </button>
+
+                            <button type="submit" name="action" value="cancel" class="danger-btn small-btn">
+                                Cancel
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="empty-message">No memberships found.</p>
+        {% endif %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

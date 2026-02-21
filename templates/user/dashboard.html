@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>User Dashboard</h1>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="dashboard-container">
+
+        <div class="dashboard-card">
+            <h3>Browse Vendors</h3>
+            <a href="/user/vendors" class="dashboard-btn">
+                View Vendors
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Your Cart</h3>
+            <a href="/user/cart" class="dashboard-btn">
+                View Cart
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Your Orders</h3>
+            <a href="/user/orders" class="dashboard-btn">
+                My Orders
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Guest List</h3>
+            <a href="/user/guestlist" class="dashboard-btn">
+                Guest List
+            </a>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

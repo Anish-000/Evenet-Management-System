@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Vendor - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Select Vendor</h1>
+        <div>
+            <a href="/user/dashboard" class="back-btn">Dashboard</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+
+        {% if vendors %}
+            {% for vendor in vendors %}
+                <div class="dashboard-card">
+                    <h3>{{ vendor.name }}</h3>
+                    <a href="/user/vendor_products/{{ vendor.id }}" class="dashboard-btn">
+                        View Products
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">No vendors available.</p>
+        {% endif %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Cart - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Your Cart</h1>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="table-container">
+
+        {% if cart_items %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>₹{{ item.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price * item.quantity }}</td>
+                    <td>
+                        <a href="/user/remove_from_cart/{{ item.id }}" class="danger-btn small-btn">
+                            Remove
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="cart-summary">
+            <h3>Total Amount: ₹{{ total }}</h3>
+            <a href="/user/checkout" class="primary-btn">Proceed to Checkout</a>
+            <a href="/user/vendors" class="secondary-btn">Continue Shopping</a>
+        </div>
+
+        {% else %}
+            <p class="empty-message">Your cart is empty.</p>
+            <a href="/user/vendors" class="primary-btn">Browse Vendors</a>
+        {% endif %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

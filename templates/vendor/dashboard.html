@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vendor Dashboard - Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="topbar">
+        <h1>Vendor Dashboard</h1>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="dashboard-container">
+
+        <div class="dashboard-card">
+            <h3>Product Management</h3>
+            <a href="/vendor/add_product" class="dashboard-btn">
+                Add Product
+            </a>
+            <a href="/vendor/products" class="dashboard-btn">
+                View My Products
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Order Management</h3>
+            <a href="/vendor/orders" class="dashboard-btn">
+                Manage Orders
+            </a>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
