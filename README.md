@@ -15,7 +15,10 @@ The Event Management System is a complete role-based platform that allows:
 
 It simulates a real-world event service workflow with clean architecture and secure authentication.
 
+
 🛠 Core Features
+
+
 🔐 Authentication & Security
 
 Role-based login system (Admin / Vendor / User)
@@ -25,6 +28,7 @@ Secure password hashing
 Session management
 
 Client-side & server-side validations
+
 
 👑 Admin Panel
 
@@ -36,6 +40,7 @@ Add / Update / Cancel Membership
 
 View & Update All Orders
 
+
 🏪 Vendor Panel
 
 Add Products (with image upload)
@@ -45,6 +50,7 @@ View & Delete Products
 Manage Orders
 
 Update Order Status
+
 
 👤 User Panel
 
@@ -60,12 +66,17 @@ Track Order Status
 
 Manage Guest List (Add / Update / Delete)
 
+
 🧰 Tech Stack
 
 Backend: Flask (Python)
+
 Database: SQLite
+
 Frontend: HTML, CSS, JavaScript
+
 Authentication: Werkzeug Security
+
 
 📂 Project Structure
 
@@ -98,7 +109,6 @@ pip install flask
 python app.py
 
 Open in browser:
-
 http://127.0.0.1:5000/
 
 
@@ -114,6 +124,7 @@ Styled tables & buttons
 
 Clean dashboard layout
 
+
 🎯 Purpose
 
 This project was developed as an academic full-stack application to demonstrate:
@@ -125,5 +136,6 @@ Database management with SQLite
 Frontend styling & layout design
 
 Role-based system architecture
+
 
 🌟 Developed with dedication and attention to structure.
