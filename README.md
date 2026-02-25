@@ -1,34 +1,42 @@
 🎉 Event Management System
 
-A full-stack Event Management System built using Flask, SQLite, HTML, CSS, and JavaScript.
-This project implements role-based access for Admin, Vendor, and User with complete event workflow management.
+A full-stack web application built using Flask, SQLite, HTML, CSS, and JavaScript.
+Designed with role-based architecture and a modern, responsive UI.
 
-🚀 Features
-👤 Authentication & Security
+🚀 Project Overview
 
-Role-based login system (Admin, Vendor, User)
+The Event Management System is a complete role-based platform that allows:
+
+👑 Admin to manage users, vendors, memberships, and orders
+
+🏪 Vendors to manage products and update order statuses
+
+👤 Users to browse products, manage cart, place orders, and maintain guest lists
+
+It simulates a real-world event service workflow with clean architecture and secure authentication.
+
+🛠 Core Features
+🔐 Authentication & Security
+
+Role-based login system (Admin / Vendor / User)
 
 Secure password hashing
 
-Session-based authentication
+Session management
 
-Client-side & server-side form validation
+Client-side & server-side validations
 
-🛠 Admin Module
+👑 Admin Panel
 
-Maintain Users (view & delete)
+Manage Users
 
-Maintain Vendors (view & delete)
+Manage Vendors
 
-Add Membership
+Add / Update / Cancel Membership
 
-Update / Cancel Membership
+View & Update All Orders
 
-Manage all Orders
-
-Update Order Status
-
-🏪 Vendor Module
+🏪 Vendor Panel
 
 Add Products (with image upload)
 
@@ -36,33 +44,30 @@ View & Delete Products
 
 Manage Orders
 
-Update Order Status (Received → Ready → Out for Delivery)
+Update Order Status
 
-👥 User Module
+👤 User Panel
 
-View Vendors
+Browse Vendors
 
-View Vendor Products
+View Products
 
 Add to Cart
 
-Remove from Cart
-
 Checkout (Cash / UPI)
 
-Order Status Tracking
+Track Order Status
 
-Guest List Management (Add / Update / Delete)
+Manage Guest List (Add / Update / Delete)
 
-🖼 Product Image Upload
+🧰 Tech Stack
 
-Vendors can upload product images
+Backend: Flask (Python)
+Database: SQLite
+Frontend: HTML, CSS, JavaScript
+Authentication: Werkzeug Security
 
-Images stored in static/uploads
-
-Displayed in product list & cart
-
-🗂 Project Structure
+📂 Project Structure
 
 Event-Management-System/
 │
@@ -79,61 +84,46 @@ Event-Management-System/
     ├── vendor/
     └── user/
 
-🧰 Tech Stack
-
-Backend: Flask (Python)
-
-Database: SQLite
-
-Frontend: HTML, CSS
-
-Client-side Validation: JavaScript
-
-Authentication: Werkzeug password hashing
 
 ⚙️ Installation & Setup
 
 1️⃣ Clone Repository
+git clone https://github.com/Anish-000/Evenet-Management-System.git
+cd Evenet-Management-System
 
-git clone https://github.com/your-username/event-management-system.git
-cd event-management-system
-
-2️⃣ Create Virtual Environment (Optional but Recommended)
-
-python -m venv venv
-source venv/bin/activate   # Mac/Linux
-venv\Scripts\activate      # Windows
-
-3️⃣ Install Dependencies
-
+2️⃣ Install Dependencies
 pip install flask
 
-4️⃣ Run Application
-
+3️⃣ Run the Application
 python app.py
 
-Application will run at:
+Open in browser :
 
 http://127.0.0.1:5000/
 
 
-🔐 Default Flow
+✨ UI Highlights
 
-User → Vendors → Products → Cart → Checkout → Order Status
+Gradient-based modern design
 
-Admin → Manage Users, Vendors, Membership, Orders
+Soft shadows & rounded cards
 
-Vendor → Add Products → Manage Orders
+Responsive layout
 
-📌 Key Highlights
+Styled tables & buttons
 
-✔ Role-based dashboards
-✔ Professional UI
-✔ Image upload support
-✔ Guest list management
-✔ Secure authentication
-✔ Structured project architecture
+Clean dashboard layout
 
-📄 License
+🎯 Purpose
 
-This project is developed for academic and learning purposes.
+This project was developed as an academic full-stack application to demonstrate:
+
+Backend logic using Flask
+
+Database management with SQLite
+
+Frontend styling & layout design
+
+Role-based system architecture
+
+🌟 Developed with dedication and attention to structure.
