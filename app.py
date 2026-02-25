@@ -8,9 +8,9 @@ app = Flask(__name__)
 app.secret_key = "super_secret_key"
 
 
-# -------------------------------
+
 # Database Connection
-# -------------------------------
+
 
 def get_db_connection():
     conn = sqlite3.connect("database.db")
@@ -18,9 +18,9 @@ def get_db_connection():
     return conn
 
 
-# -------------------------------
+
 # Initialize Database
-# -------------------------------
+
 
 def init_db():
     conn = get_db_connection()
@@ -100,9 +100,9 @@ def init_db():
         )
     """)
 
-    # -------------------------------
+  
     # Guest List Table
-    # -------------------------------
+ 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS guest_list (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,9 +119,9 @@ def init_db():
     conn.close()
 
 
-# -------------------------------
+
 # Signup
-# -------------------------------
+
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -150,9 +150,9 @@ def signup():
     return render_template("auth/signup.html")
 
 
-# -------------------------------
+
 # Login
-# -------------------------------
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -183,18 +183,18 @@ def login():
     return render_template("auth/login.html")
 
 
-# -------------------------------
+
 # Logout
-# -------------------------------
+
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/login")
 
-# -------------------------------
+
 # Role Protection Helper
-# -------------------------------
+
 
 def login_required(role):
     def decorator(func):
@@ -211,9 +211,9 @@ def login_required(role):
     return decorator
 
 
-# -------------------------------
+
 # Admin Dashboard
-# -------------------------------
+
 
 @app.route("/admin/dashboard")
 @login_required("admin")
@@ -221,9 +221,9 @@ def admin_dashboard():
     return render_template("admin/dashboard.html")
 
 
-# -------------------------------
+
 # Vendor Dashboard
-# -------------------------------
+
 
 @app.route("/vendor/dashboard")
 @login_required("vendor")
@@ -231,18 +231,18 @@ def vendor_dashboard():
     return render_template("vendor/dashboard.html")
 
 
-# -------------------------------
+
 # User Dashboard
-# -------------------------------
+
 
 @app.route("/user/dashboard")
 @login_required("user")
 def user_dashboard():
     return render_template("user/dashboard.html")
 
-# -------------------------------
+
 # Vendor - Add Product
-# -------------------------------
+
 
 @app.route("/vendor/add_product", methods=["GET", "POST"])
 @login_required("vendor")
@@ -264,9 +264,9 @@ def add_product():
     return render_template("vendor/add_product.html")
 
 
-# -------------------------------
+
 # Vendor - View Products
-# -------------------------------
+
 
 @app.route("/vendor/products")
 @login_required("vendor")
@@ -281,9 +281,9 @@ def vendor_products():
     return render_template("vendor/product_list.html", products=products)
 
 
-# -------------------------------
+
 # Vendor - Delete Product
-# -------------------------------
+
 
 @app.route("/vendor/delete_product/<int:id>")
 @login_required("vendor")
@@ -298,9 +298,9 @@ def delete_product(id):
 
     return redirect("/vendor/products")
 
-# -------------------------------
+
 # User - View All Products
-# -------------------------------
+
 
 @app.route("/user/products")
 @login_required("user")
@@ -316,9 +316,9 @@ def user_products():
     return render_template("user/product_list.html", products=products)
 
 
-# -------------------------------
+
 # User - Add To Cart
-# -------------------------------
+
 
 @app.route("/user/add_to_cart/<int:product_id>")
 @login_required("user")
@@ -346,9 +346,9 @@ def add_to_cart(product_id):
 
     return redirect("/user/products")
 
-# -------------------------------
+
 # User - View Cart
-# -------------------------------
+
 
 @app.route("/user/cart")
 @login_required("user")
@@ -371,9 +371,9 @@ def view_cart():
     return render_template("user/cart.html", cart_items=cart_items, total=total)
 
 
-# -------------------------------
+
 # User - Remove From Cart
-# -------------------------------
+
 
 @app.route("/user/remove_from_cart/<int:id>")
 @login_required("user")
@@ -388,9 +388,9 @@ def remove_from_cart(id):
 
     return redirect("/user/cart")
 
-# -------------------------------
+
 # User - Checkout
-# -------------------------------
+
 
 @app.route("/user/checkout", methods=["GET", "POST"])
 @login_required("user")
@@ -444,9 +444,9 @@ def checkout():
     conn.close()
     return render_template("user/checkout.html", total=total)
 
-# -------------------------------
+
 # User - View Orders
-# -------------------------------
+
 
 @app.route("/user/orders")
 @login_required("user")
@@ -462,9 +462,9 @@ def user_orders():
 
     return render_template("user/order_status.html", orders=orders)
 
-# -------------------------------
+
 # Vendor - View Orders
-# -------------------------------
+
 
 @app.route("/vendor/orders")
 @login_required("vendor")
@@ -484,9 +484,9 @@ def vendor_orders():
 
     return render_template("vendor/update_status.html", orders=orders)
 
-# -------------------------------
+
 # Vendor - Update Order Status
-# -------------------------------
+
 
 @app.route("/vendor/update_status/<int:order_id>", methods=["POST"])
 @login_required("vendor")
@@ -503,9 +503,9 @@ def update_status(order_id):
 
     return redirect("/vendor/orders")
 
-# -------------------------------
+
 # Admin - View All Orders
-# -------------------------------
+
 
 @app.route("/admin/orders")
 @login_required("admin")
@@ -519,9 +519,9 @@ def admin_orders():
     return render_template("admin/orders.html", orders=orders)
 
 
-# -------------------------------
+
 # Admin - Update Order Status
-# -------------------------------
+
 
 @app.route("/admin/update_status/<int:order_id>", methods=["POST"])
 @login_required("admin")
@@ -538,9 +538,9 @@ def admin_update_status(order_id):
 
     return redirect("/admin/orders")
 
-# -------------------------------
+
 # Admin - Maintain Users
-# -------------------------------
+
 
 @app.route("/admin/maintain_users")
 @login_required("admin")
@@ -562,9 +562,9 @@ def delete_user(id):
     conn.close()
     return redirect("/admin/maintain_users")
 
-# -------------------------------
+
 # Admin - Maintain Vendors
-# -------------------------------
+
 
 @app.route("/admin/maintain_vendors")
 @login_required("admin")
@@ -586,9 +586,9 @@ def delete_vendor(id):
     conn.close()
     return redirect("/admin/maintain_vendors")
 
-# -------------------------------
+
 # Admin - Add Membership
-# -------------------------------
+
 
 @app.route("/admin/membership_add", methods=["GET", "POST"])
 @login_required("admin")
@@ -625,9 +625,9 @@ def membership_add():
     conn.close()
     return render_template("admin/membership_add.html", users=users)
 
-# -------------------------------
+
 # Admin - Update Membership
-# -------------------------------
+
 @app.route("/admin/membership_update", methods=["GET", "POST"])
 @login_required("admin")
 def membership_update():
@@ -674,9 +674,9 @@ def membership_update():
     conn.close()
     return render_template("admin/membership_update.html", memberships=memberships)
 
-# -------------------------------
+
 # User - View Vendors
-# -------------------------------
+
 
 @app.route("/user/vendors")
 @login_required("user")
@@ -689,9 +689,9 @@ def user_vendors():
 
     return render_template("user/vendor_list.html", vendors=vendors)
 
-# -------------------------------
+
 # User - View Products by Vendor
-# -------------------------------
+
 
 @app.route("/user/vendor_products/<int:vendor_id>")
 @login_required("user")
@@ -705,9 +705,9 @@ def vendor_products_for_user(vendor_id):
 
     return render_template("user/product_list.html", products=products)
 
-# -------------------------------
+
 # User - View Guest List
-# -------------------------------
+
 @app.route("/user/guestlist")
 @login_required("user")
 def view_guestlist():
@@ -721,9 +721,9 @@ def view_guestlist():
 
     return render_template("user/guest_list.html", guests=guests)
 
-# -------------------------------
+
 # User - Add Guest
-# -------------------------------
+
 @app.route("/user/add_guest", methods=["GET", "POST"])
 @login_required("user")
 def add_guest():
@@ -744,9 +744,9 @@ def add_guest():
 
     return render_template("user/add_guest.html")
 
-# -------------------------------
+
 # User - Update Guest
-# -------------------------------
+
 @app.route("/user/update_guest/<int:id>", methods=["GET", "POST"])
 @login_required("user")
 def update_guest(id):
@@ -775,9 +775,9 @@ def update_guest(id):
     conn.close()
     return render_template("user/update_guest.html", guest=guest)
 
-# -------------------------------
+
 # User - Delete Guest
-# -------------------------------
+
 @app.route("/user/delete_guest/<int:id>")
 @login_required("user")
 def delete_guest(id):
@@ -792,9 +792,9 @@ def delete_guest(id):
     return redirect("/user/guestlist")
 
 
-# -------------------------------
+
 # Test Route
-# -------------------------------
+
 
 @app.route("/")
 def home():
@@ -811,9 +811,9 @@ def home():
     return redirect("/login")
 
 
-# -------------------------------
+
 # Run App
-# -------------------------------
+
 
 if __name__ == "__main__":
     init_db()
