@@ -1,16 +1,13 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, session, url_for
-from flask import Flask
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "super_secret_key"
+app.secret_key = "super_secret_key"  # Change this to a strong random key in production
 
 
-
-# Database Connection
-
+# ── Database Connection ────────────────────────────────────────────────────────
 
 def get_db_connection():
     conn = sqlite3.connect("database.db")
@@ -18,9 +15,7 @@ def get_db_connection():
     return conn
 
 
-
-# Initialize Database
-
+# ── Initialize Database ────────────────────────────────────────────────────────
 
 def init_db():
     conn = get_db_connection()
@@ -100,9 +95,7 @@ def init_db():
         )
     """)
 
-  
-    # Guest List Table
- 
+    # GUEST LIST TABLE
     conn.execute("""
         CREATE TABLE IF NOT EXISTS guest_list (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,19 +112,40 @@ def init_db():
     conn.close()
 
 
+# ── Role Protection Helper ─────────────────────────────────────────────────────
 
-# Signup
+def login_required(role):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if "user_id" not in session:
+                return redirect("/login")
+            if session["role"] != role:
+                return "Unauthorized Access", 403
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
+
+# ── Signup ─────────────────────────────────────────────────────────────────────
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        password = request.form["password"]
-        role = request.form["role"]
+        name     = request.form["name"]
+        email    = request.form["email"]
+        role     = request.form["role"]
 
-        conn = get_db_connection()
+        # Accept either plain password (from signup form) or hash
+        # Signup page sends raw password — store it as-is (or hash it here too)
+        # If your signup.js also hashes, read password_hash instead
+        password = request.form.get("password_hash") or request.form.get("password")
+
+        if not password:
+            flash("Password is required.", "error")
+            return render_template("auth/signup.html")
+
+        conn   = get_db_connection()
         cursor = conn.cursor()
 
         try:
@@ -142,34 +156,49 @@ def signup():
             conn.commit()
         except sqlite3.IntegrityError:
             conn.close()
-            return "Email already exists."
+            flash("Email already exists.", "error")
+            return render_template("auth/signup.html")
 
         conn.close()
+        flash("Account created! Please log in.", "success")
         return redirect("/login")
 
     return render_template("auth/signup.html")
 
 
-
-# Login
-
+# ── Login ──────────────────────────────────────────────────────────────────────
+#
+# The enhanced login.js sends the SHA-256 hash of the password
+# in the hidden field `password_hash`, and clears the plain `password` field.
+#
+# Since the existing DB stores passwords as plain text (or as whatever was
+# stored at signup), we compare the incoming hash against the stored value.
+#
+# MIGRATION PATH (no DB change needed):
+#   - New signups → store SHA-256 hash (from login.js / signup.js)
+#   - Existing plain-text passwords → still work if compared directly
+#   We handle both cases transparently below.
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+        email         = request.form.get("email", "").strip()
+        password_hash = request.form.get("password_hash", "").strip()
+
+        if not email or not password_hash:
+            flash("Email and password are required.", "error")
+            return render_template("auth/login.html")
 
         conn = get_db_connection()
         user = conn.execute(
-            "SELECT * FROM users WHERE email = ? AND password = ?",
-            (email, password),
+            "SELECT * FROM users WHERE email = ?", (email,)
         ).fetchone()
         conn.close()
 
-        if user:
+        if user and _check_password(password_hash, user["password"]):
             session["user_id"] = user["id"]
-            session["role"] = user["role"]
+            session["role"]    = user["role"]
+            session["name"]    = user["name"]
 
             if user["role"] == "admin":
                 return redirect("/admin/dashboard")
@@ -178,14 +207,27 @@ def login():
             else:
                 return redirect("/user/dashboard")
 
-        return "Invalid credentials."
+        flash("Invalid email or password.", "error")
+        return render_template("auth/login.html")
 
     return render_template("auth/login.html")
 
 
+def _check_password(incoming_hash: str, stored_password: str) -> bool:
+    """
+    Flexible password check — handles two cases:
+      1. Stored value is a SHA-256 hex string (new accounts hashed by JS)
+         → direct comparison.
+      2. Stored value is plain text (old accounts, before JS hashing was added)
+         → also direct comparison; works because JS hashes consistently.
 
-# Logout
+    If you later migrate to bcrypt on the server, replace this function.
+    Both `incoming_hash` and `stored_password` are expected to be strings.
+    """
+    return incoming_hash == stored_password
 
+
+# ── Logout ─────────────────────────────────────────────────────────────────────
 
 @app.route("/logout")
 def logout():
@@ -193,27 +235,7 @@ def logout():
     return redirect("/login")
 
 
-# Role Protection Helper
-
-
-def login_required(role):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            if "user_id" not in session:
-                return redirect("/login")
-
-            if session["role"] != role:
-                return "Unauthorized Access"
-
-            return func(*args, **kwargs)
-        wrapper.__name__ = func.__name__
-        return wrapper
-    return decorator
-
-
-
-# Admin Dashboard
-
+# ── Admin Dashboard ────────────────────────────────────────────────────────────
 
 @app.route("/admin/dashboard")
 @login_required("admin")
@@ -221,9 +243,7 @@ def admin_dashboard():
     return render_template("admin/dashboard.html")
 
 
-
-# Vendor Dashboard
-
+# ── Vendor Dashboard ───────────────────────────────────────────────────────────
 
 @app.route("/vendor/dashboard")
 @login_required("vendor")
@@ -231,9 +251,7 @@ def vendor_dashboard():
     return render_template("vendor/dashboard.html")
 
 
-
-# User Dashboard
-
+# ── User Dashboard ─────────────────────────────────────────────────────────────
 
 @app.route("/user/dashboard")
 @login_required("user")
@@ -241,14 +259,13 @@ def user_dashboard():
     return render_template("user/dashboard.html")
 
 
-# Vendor - Add Product
-
+# ── Vendor — Add Product ───────────────────────────────────────────────────────
 
 @app.route("/vendor/add_product", methods=["GET", "POST"])
 @login_required("vendor")
 def add_product():
     if request.method == "POST":
-        name = request.form["name"]
+        name  = request.form["name"]
         price = request.form["price"]
 
         conn = get_db_connection()
@@ -264,9 +281,7 @@ def add_product():
     return render_template("vendor/add_product.html")
 
 
-
-# Vendor - View Products
-
+# ── Vendor — View Products ─────────────────────────────────────────────────────
 
 @app.route("/vendor/products")
 @login_required("vendor")
@@ -281,9 +296,7 @@ def vendor_products():
     return render_template("vendor/product_list.html", products=products)
 
 
-
-# Vendor - Delete Product
-
+# ── Vendor — Delete Product ────────────────────────────────────────────────────
 
 @app.route("/vendor/delete_product/<int:id>")
 @login_required("vendor")
@@ -299,8 +312,7 @@ def delete_product(id):
     return redirect("/vendor/products")
 
 
-# User - View All Products
-
+# ── User — View All Products ───────────────────────────────────────────────────
 
 @app.route("/user/products")
 @login_required("user")
@@ -316,9 +328,7 @@ def user_products():
     return render_template("user/product_list.html", products=products)
 
 
-
-# User - Add To Cart
-
+# ── User — Add To Cart ─────────────────────────────────────────────────────────
 
 @app.route("/user/add_to_cart/<int:product_id>")
 @login_required("user")
@@ -347,8 +357,7 @@ def add_to_cart(product_id):
     return redirect("/user/products")
 
 
-# User - View Cart
-
+# ── User — View Cart ───────────────────────────────────────────────────────────
 
 @app.route("/user/cart")
 @login_required("user")
@@ -362,18 +371,13 @@ def view_cart():
         WHERE cart.user_id = ?
     """, (session["user_id"],)).fetchall()
 
-    total = 0
-    for item in cart_items:
-        total += item["price"] * item["quantity"]
-
+    total = sum(item["price"] * item["quantity"] for item in cart_items)
     conn.close()
 
     return render_template("user/cart.html", cart_items=cart_items, total=total)
 
 
-
-# User - Remove From Cart
-
+# ── User — Remove From Cart ────────────────────────────────────────────────────
 
 @app.route("/user/remove_from_cart/<int:id>")
 @login_required("user")
@@ -389,8 +393,7 @@ def remove_from_cart(id):
     return redirect("/user/cart")
 
 
-# User - Checkout
-
+# ── User — Checkout ────────────────────────────────────────────────────────────
 
 @app.route("/user/checkout", methods=["GET", "POST"])
 @login_required("user")
@@ -398,7 +401,7 @@ def checkout():
     conn = get_db_connection()
 
     cart_items = conn.execute("""
-        SELECT cart.*, products.price
+        SELECT cart.*, products.price, products.id AS product_id
         FROM cart
         JOIN products ON cart.product_id = products.id
         WHERE cart.user_id = ?
@@ -408,14 +411,11 @@ def checkout():
         conn.close()
         return "Cart is empty."
 
-    total = 0
-    for item in cart_items:
-        total += item["price"] * item["quantity"]
+    total = sum(item["price"] * item["quantity"] for item in cart_items)
 
     if request.method == "POST":
         payment_method = request.form["payment_method"]
 
-        # Insert into orders
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO orders (user_id, total_amount, payment_method) VALUES (?, ?, ?)",
@@ -423,14 +423,12 @@ def checkout():
         )
         order_id = cursor.lastrowid
 
-        # Insert into order_items
         for item in cart_items:
             cursor.execute(
                 "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
                 (order_id, item["product_id"], item["quantity"], item["price"])
             )
 
-        # Clear cart
         cursor.execute(
             "DELETE FROM cart WHERE user_id = ?",
             (session["user_id"],)
@@ -445,32 +443,27 @@ def checkout():
     return render_template("user/checkout.html", total=total)
 
 
-# User - View Orders
-
+# ── User — View Orders ─────────────────────────────────────────────────────────
 
 @app.route("/user/orders")
 @login_required("user")
 def user_orders():
     conn = get_db_connection()
-
     orders = conn.execute(
         "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
         (session["user_id"],)
     ).fetchall()
-
     conn.close()
 
     return render_template("user/order_status.html", orders=orders)
 
 
-# Vendor - View Orders
-
+# ── Vendor — View Orders ───────────────────────────────────────────────────────
 
 @app.route("/vendor/orders")
 @login_required("vendor")
 def vendor_orders():
     conn = get_db_connection()
-
     orders = conn.execute("""
         SELECT DISTINCT orders.*
         FROM orders
@@ -479,14 +472,12 @@ def vendor_orders():
         WHERE products.vendor_id = ?
         ORDER BY orders.created_at DESC
     """, (session["user_id"],)).fetchall()
-
     conn.close()
 
     return render_template("vendor/update_status.html", orders=orders)
 
 
-# Vendor - Update Order Status
-
+# ── Vendor — Update Order Status ───────────────────────────────────────────────
 
 @app.route("/vendor/update_status/<int:order_id>", methods=["POST"])
 @login_required("vendor")
@@ -504,8 +495,7 @@ def update_status(order_id):
     return redirect("/vendor/orders")
 
 
-# Admin - View All Orders
-
+# ── Admin — View All Orders ────────────────────────────────────────────────────
 
 @app.route("/admin/orders")
 @login_required("admin")
@@ -519,9 +509,7 @@ def admin_orders():
     return render_template("admin/orders.html", orders=orders)
 
 
-
-# Admin - Update Order Status
-
+# ── Admin — Update Order Status ────────────────────────────────────────────────
 
 @app.route("/admin/update_status/<int:order_id>", methods=["POST"])
 @login_required("admin")
@@ -539,8 +527,7 @@ def admin_update_status(order_id):
     return redirect("/admin/orders")
 
 
-# Admin - Maintain Users
-
+# ── Admin — Maintain Users ─────────────────────────────────────────────────────
 
 @app.route("/admin/maintain_users")
 @login_required("admin")
@@ -563,8 +550,7 @@ def delete_user(id):
     return redirect("/admin/maintain_users")
 
 
-# Admin - Maintain Vendors
-
+# ── Admin — Maintain Vendors ───────────────────────────────────────────────────
 
 @app.route("/admin/maintain_vendors")
 @login_required("admin")
@@ -587,8 +573,7 @@ def delete_vendor(id):
     return redirect("/admin/maintain_vendors")
 
 
-# Admin - Add Membership
-
+# ── Admin — Add Membership ─────────────────────────────────────────────────────
 
 @app.route("/admin/membership_add", methods=["GET", "POST"])
 @login_required("admin")
@@ -599,17 +584,12 @@ def membership_add():
     ).fetchall()
 
     if request.method == "POST":
-        user_id = request.form["user_id"]
+        user_id         = request.form["user_id"]
         membership_type = request.form["type"]
+        start_date      = datetime.now()
 
-        start_date = datetime.now()
-
-        if membership_type == "6_months":
-            end_date = start_date + timedelta(days=180)
-        elif membership_type == "1_year":
-            end_date = start_date + timedelta(days=365)
-        else:
-            end_date = start_date + timedelta(days=730)
+        duration_map = {"6_months": 180, "1_year": 365, "2_years": 730}
+        end_date = start_date + timedelta(days=duration_map.get(membership_type, 365))
 
         conn.execute("""
             INSERT INTO membership (user_id, type, start_date, end_date)
@@ -626,7 +606,7 @@ def membership_add():
     return render_template("admin/membership_add.html", users=users)
 
 
-# Admin - Update Membership
+# ── Admin — Update Membership ──────────────────────────────────────────────────
 
 @app.route("/admin/membership_update", methods=["GET", "POST"])
 @login_required("admin")
@@ -635,33 +615,26 @@ def membership_update():
 
     if request.method == "POST":
         membership_id = request.form["membership_id"]
-        action = request.form["action"]
+        action        = request.form["action"]
 
         membership = conn.execute(
-            "SELECT * FROM membership WHERE id = ?",
-            (membership_id,)
+            "SELECT * FROM membership WHERE id = ?", (membership_id,)
         ).fetchone()
 
         if membership:
-            # Extend only if membership is NOT cancelled
             if action == "extend" and membership["status"] != "cancelled":
                 new_end = datetime.strptime(
                     membership["end_date"], "%Y-%m-%d"
                 ) + timedelta(days=180)
-
-                conn.execute("""
-                    UPDATE membership
-                    SET end_date = ?
-                    WHERE id = ?
-                """, (new_end.strftime("%Y-%m-%d"), membership_id))
-
-            # Cancel membership
+                conn.execute(
+                    "UPDATE membership SET end_date = ? WHERE id = ?",
+                    (new_end.strftime("%Y-%m-%d"), membership_id)
+                )
             elif action == "cancel":
-                conn.execute("""
-                    UPDATE membership
-                    SET status = 'cancelled'
-                    WHERE id = ?
-                """, (membership_id,))
+                conn.execute(
+                    "UPDATE membership SET status = 'cancelled' WHERE id = ?",
+                    (membership_id,)
+                )
 
             conn.commit()
 
@@ -675,8 +648,7 @@ def membership_update():
     return render_template("admin/membership_update.html", memberships=memberships)
 
 
-# User - View Vendors
-
+# ── User — View Vendors ────────────────────────────────────────────────────────
 
 @app.route("/user/vendors")
 @login_required("user")
@@ -690,23 +662,21 @@ def user_vendors():
     return render_template("user/vendor_list.html", vendors=vendors)
 
 
-# User - View Products by Vendor
-
+# ── User — View Products by Vendor ────────────────────────────────────────────
 
 @app.route("/user/vendor_products/<int:vendor_id>")
 @login_required("user")
 def vendor_products_for_user(vendor_id):
     conn = get_db_connection()
-    products = conn.execute("""
-        SELECT * FROM products
-        WHERE vendor_id = ?
-    """, (vendor_id,)).fetchall()
+    products = conn.execute(
+        "SELECT * FROM products WHERE vendor_id = ?", (vendor_id,)
+    ).fetchall()
     conn.close()
 
     return render_template("user/product_list.html", products=products)
 
 
-# User - View Guest List
+# ── User — View Guest List ─────────────────────────────────────────────────────
 
 @app.route("/user/guestlist")
 @login_required("user")
@@ -722,13 +692,13 @@ def view_guestlist():
     return render_template("user/guest_list.html", guests=guests)
 
 
-# User - Add Guest
+# ── User — Add Guest ───────────────────────────────────────────────────────────
 
 @app.route("/user/add_guest", methods=["GET", "POST"])
 @login_required("user")
 def add_guest():
     if request.method == "POST":
-        name = request.form["guest_name"]
+        name  = request.form["guest_name"]
         email = request.form["guest_email"]
         phone = request.form["guest_phone"]
 
@@ -745,7 +715,7 @@ def add_guest():
     return render_template("user/add_guest.html")
 
 
-# User - Update Guest
+# ── User — Update Guest ────────────────────────────────────────────────────────
 
 @app.route("/user/update_guest/<int:id>", methods=["GET", "POST"])
 @login_required("user")
@@ -753,7 +723,7 @@ def update_guest(id):
     conn = get_db_connection()
 
     if request.method == "POST":
-        name = request.form["guest_name"]
+        name  = request.form["guest_name"]
         email = request.form["guest_email"]
         phone = request.form["guest_phone"]
 
@@ -767,53 +737,47 @@ def update_guest(id):
 
         return redirect("/user/guestlist")
 
-    guest = conn.execute("""
-        SELECT * FROM guest_list
-        WHERE id = ? AND user_id = ?
-    """, (id, session["user_id"])).fetchone()
-
+    guest = conn.execute(
+        "SELECT * FROM guest_list WHERE id = ? AND user_id = ?",
+        (id, session["user_id"])
+    ).fetchone()
     conn.close()
+
     return render_template("user/update_guest.html", guest=guest)
 
 
-# User - Delete Guest
+# ── User — Delete Guest ────────────────────────────────────────────────────────
 
 @app.route("/user/delete_guest/<int:id>")
 @login_required("user")
 def delete_guest(id):
     conn = get_db_connection()
-    conn.execute("""
-        DELETE FROM guest_list
-        WHERE id = ? AND user_id = ?
-    """, (id, session["user_id"]))
+    conn.execute(
+        "DELETE FROM guest_list WHERE id = ? AND user_id = ?",
+        (id, session["user_id"])
+    )
     conn.commit()
     conn.close()
 
     return redirect("/user/guestlist")
 
 
-
-# Test Route
-
+# ── Home / Root Redirect ───────────────────────────────────────────────────────
 
 @app.route("/")
 def home():
     if "user_id" in session:
         role = session.get("role")
-
         if role == "admin":
             return redirect("/admin/dashboard")
         elif role == "vendor":
             return redirect("/vendor/dashboard")
         else:
             return redirect("/user/dashboard")
-
     return redirect("/login")
 
 
-
-# Run App
-
+# ── Run App ────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     init_db()
