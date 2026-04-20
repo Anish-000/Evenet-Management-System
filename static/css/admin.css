@@ -1,0 +1,604 @@
+/* ============================================================
+   admin.css — Event Management System
+   Admin-only pages: membership add/update,
+   maintain users, maintain vendors, add/update user/vendor
+   Requires: base.css
+   ============================================================ */
+
+/* ══════════════════════════════════════════════════════════
+   SHARED ADMIN LAYOUT
+   ══════════════════════════════════════════════════════════ */
+.admin-page-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+}
+
+.admin-form-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.admin-form-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-form-header-icon {
+    width: 42px; height: 42px;
+    border-radius: var(--radius-sm);
+    background: var(--gold-dim);
+    border: 1px solid rgba(236,175,90,0.2);
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.admin-form-header-text h2 {
+    font-family: var(--ff-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.admin-form-header-text p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.admin-form-body { padding: 24px; }
+
+/* Info sidebar card */
+.admin-info-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--nav-h) + 20px);
+}
+
+.admin-info-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.admin-info-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.admin-info-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.admin-info-item-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--radius-xs);
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.admin-info-item-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.admin-info-item-text strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MEMBERSHIP — ADD
+   ══════════════════════════════════════════════════════════ */
+
+/* Membership type selector */
+.membership-type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.membership-type-option {
+    position: relative;
+}
+
+.membership-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+
+.membership-type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-surface-2);
+    cursor: pointer;
+    transition: all var(--t-base);
+    text-align: center;
+}
+
+.membership-type-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.membership-type-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: color var(--t-base);
+}
+
+.membership-type-duration {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.membership-type-option input:checked + .membership-type-card {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+}
+
+.membership-type-option input:checked + .membership-type-card .membership-type-label {
+    color: var(--gold);
+}
+
+.membership-type-option input:checked + .membership-type-card .membership-type-duration {
+    color: var(--gold-light);
+    opacity: 0.8;
+}
+
+.membership-type-option:hover .membership-type-card {
+    border-color: var(--border-med);
+}
+
+/* Date preview strip */
+.membership-dates-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 16px;
+}
+
+.date-preview-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.date-preview-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+}
+
+.date-preview-value {
+    font-family: var(--ff-mono);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MEMBERSHIP — UPDATE
+   ══════════════════════════════════════════════════════════ */
+.membership-table-wrap {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.membership-search-bar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.membership-search-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.membership-search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.membership-search {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--ff-body);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color var(--t-base);
+}
+
+.membership-search::placeholder { color: var(--text-muted); }
+.membership-search:focus { border-color: var(--border-focus); }
+
+/* Membership ID lookup field */
+.membership-lookup {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.membership-lookup .form-group { flex: 1; margin-bottom: 0; }
+
+/* Action radio pills (extend / cancel) */
+.action-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.action-option {
+    position: relative;
+}
+
+.action-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface-2);
+    cursor: pointer;
+    transition: all var(--t-base);
+}
+
+.action-card-icon {
+    width: 34px; height: 34px;
+    border-radius: var(--radius-xs);
+    background: var(--bg-surface-3);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: all var(--t-base);
+}
+
+.action-card-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color var(--t-base);
+}
+
+.action-card-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+/* Extend — green */
+.action-option.opt-extend input:checked + .action-card {
+    border-color: rgba(74,222,128,0.35);
+    background: var(--clr-success-bg);
+}
+.action-option.opt-extend input:checked + .action-card .action-card-icon {
+    background: rgba(74,222,128,0.15);
+    color: var(--clr-success);
+}
+.action-option.opt-extend input:checked + .action-card .action-card-label {
+    color: var(--clr-success);
+}
+
+/* Cancel — red */
+.action-option.opt-cancel input:checked + .action-card {
+    border-color: rgba(248,113,113,0.35);
+    background: var(--clr-error-bg);
+}
+.action-option.opt-cancel input:checked + .action-card .action-card-icon {
+    background: rgba(248,113,113,0.15);
+    color: var(--clr-error);
+}
+.action-option.opt-cancel input:checked + .action-card .action-card-label {
+    color: var(--clr-error);
+}
+
+.action-option:hover .action-card { border-color: var(--border-med); }
+
+/* Populated membership detail panel */
+.membership-detail-panel {
+    display: none;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    margin-bottom: 20px;
+}
+
+.membership-detail-panel.visible { display: block; }
+
+.membership-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+}
+
+.membership-detail-item { display: flex; flex-direction: column; gap: 3px; }
+
+.membership-detail-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+}
+
+.membership-detail-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAINTAIN USERS / VENDORS TABLE
+   ══════════════════════════════════════════════════════════ */
+.maintain-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.maintain-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.maintain-search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.maintain-search {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--ff-body);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color var(--t-base);
+}
+
+.maintain-search::placeholder { color: var(--text-muted); }
+.maintain-search:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(236,175,90,0.07); }
+
+/* User / Vendor row avatar */
+.user-row-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid rgba(236,175,90,0.2);
+    display: grid;
+    place-items: center;
+    font-family: var(--ff-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.user-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-name-cell-info { display: flex; flex-direction: column; gap: 1px; }
+
+.user-name-cell-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.user-name-cell-email {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Row action buttons */
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.row-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: var(--radius-xs);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--t-base);
+    white-space: nowrap;
+}
+
+.row-action-btn.edit {
+    background: var(--gold-dim);
+    border-color: rgba(236,175,90,0.2);
+    color: var(--gold);
+}
+
+.row-action-btn.edit:hover {
+    background: rgba(236,175,90,0.2);
+    border-color: var(--gold);
+    opacity: 1;
+}
+
+.row-action-btn.delete {
+    background: var(--clr-error-bg);
+    border-color: rgba(248,113,113,0.2);
+    color: var(--clr-error);
+}
+
+.row-action-btn.delete:hover {
+    background: rgba(248,113,113,0.2);
+    border-color: var(--clr-error);
+    opacity: 1;
+}
+
+/* Delete confirmation modal */
+.confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.confirm-modal-overlay.open { display: flex; }
+
+.confirm-modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.confirm-modal-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--clr-error-bg);
+    border: 1px solid rgba(248,113,113,0.25);
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    color: var(--clr-error);
+}
+
+.confirm-modal h3 {
+    font-family: var(--ff-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.confirm-modal p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADD / UPDATE USER & VENDOR FORMS
+   ══════════════════════════════════════════════════════════ */
+.admin-user-form-wrap {
+    max-width: 560px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .admin-page-layout      { grid-template-columns: 1fr; }
+    .admin-info-card        { position: static; }
+    .membership-type-selector { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .membership-type-selector { grid-template-columns: 1fr; }
+    .action-selector          { grid-template-columns: 1fr; }
+    .maintain-toolbar         { flex-direction: column; align-items: stretch; }
+    .maintain-search-wrap     { min-width: unset; }
+    .membership-detail-grid   { grid-template-columns: 1fr 1fr; }
+    .row-actions              { flex-wrap: wrap; }
+    .confirm-modal            { padding: 24px 20px; }
+}

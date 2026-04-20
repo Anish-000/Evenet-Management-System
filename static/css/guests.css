@@ -1,0 +1,445 @@
+/* ============================================================
+   guests.css — Event Management System
+   Guest list, Add guest & Update guest pages
+   Requires: base.css
+   ============================================================ */
+
+/* ══════════════════════════════════════════════════════════
+   GUEST LIST PAGE
+   ══════════════════════════════════════════════════════════ */
+.guest-list-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ── Guest Cards Grid ─────────────────────────────────────── */
+.guests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.guest-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: border-color var(--t-base), transform var(--t-base), box-shadow var(--t-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.guest-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity var(--t-base);
+}
+
+.guest-card:hover {
+    border-color: var(--border-med);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.guest-card:hover::before { opacity: 1; }
+
+/* Guest avatar (initials) */
+.guest-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dim), var(--bg-surface-3));
+    border: 1px solid rgba(236,175,90,0.2);
+    display: grid;
+    place-items: center;
+    font-family: var(--ff-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+/* Guest info */
+.guest-info { flex: 1; min-width: 0; }
+
+.guest-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.guest-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.guest-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.guest-contact-item svg { flex-shrink: 0; }
+
+.guest-contact-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Guest actions */
+.guest-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.guest-action-btn {
+    width: 30px; height: 30px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+    background: var(--bg-surface-2);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all var(--t-base);
+    text-decoration: none;
+}
+
+.guest-action-btn:hover { opacity: 1; }
+
+.guest-action-btn.edit:hover {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+    color: var(--gold);
+}
+
+.guest-action-btn.delete:hover {
+    border-color: var(--clr-error);
+    background: var(--clr-error-bg);
+    color: var(--clr-error);
+}
+
+/* ── Guest List Table (alternative view) ─────────────────── */
+.guest-table-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid rgba(236,175,90,0.2);
+    display: grid;
+    place-items: center;
+    font-family: var(--ff-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.guest-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Summary Sidebar ──────────────────────────────────────── */
+.guest-summary {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--nav-h) + 20px);
+}
+
+.guest-summary-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.guest-summary-title {
+    font-family: var(--ff-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.guest-total-badge {
+    font-family: var(--ff-mono);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(236,175,90,0.2);
+    border-radius: var(--radius-sm);
+    padding: 4px 12px;
+}
+
+.guest-summary-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.guest-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+.guest-stat-label { color: var(--text-muted); }
+
+.guest-stat-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.guest-summary-footer {
+    padding: 0 20px 18px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADD / UPDATE GUEST FORM
+   ══════════════════════════════════════════════════════════ */
+.guest-form-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+}
+
+.guest-form-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.guest-form-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guest-form-header-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--gold-dim);
+    border: 1px solid rgba(236,175,90,0.2);
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.guest-form-header-text h2 {
+    font-family: var(--ff-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.guest-form-header-text p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.guest-form-body {
+    padding: 24px;
+}
+
+/* Tips / info card beside the form */
+.guest-tips-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--nav-h) + 20px);
+}
+
+.guest-tips-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.guest-tips-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.guest-tip {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.guest-tip-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--radius-xs);
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.guest-tip-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.guest-tip-text strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SEARCH & TOOLBAR
+   ══════════════════════════════════════════════════════════ */
+.guest-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.guest-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.guest-search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.guest-search {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--ff-body);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color var(--t-base);
+}
+
+.guest-search::placeholder { color: var(--text-muted); }
+
+.guest-search:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(236,175,90,0.07);
+}
+
+/* ══════════════════════════════════════════════════════════
+   EMPTY STATE
+   ══════════════════════════════════════════════════════════ */
+.guests-empty {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 64px 24px;
+    text-align: center;
+    grid-column: 1 / -1;
+}
+
+.guests-empty-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    color: var(--text-muted);
+}
+
+.guests-empty h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.guests-empty p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .guest-list-layout  { grid-template-columns: 1fr; }
+    .guest-form-layout  { grid-template-columns: 1fr; }
+
+    .guest-summary,
+    .guest-tips-card { position: static; }
+}
+
+@media (max-width: 600px) {
+    .guests-grid        { grid-template-columns: 1fr; }
+    .guest-toolbar      { flex-direction: column; align-items: stretch; }
+    .guest-search-wrap  { min-width: unset; }
+
+    .guest-card {
+        flex-wrap: wrap;
+    }
+
+    .guest-actions {
+        flex-direction: row;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

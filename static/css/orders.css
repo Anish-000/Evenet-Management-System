@@ -1,0 +1,455 @@
+/* ============================================================
+   orders.css — Event Management System
+   User order status, Vendor order management,
+   Admin orders view & status update
+   Requires: base.css
+   ============================================================ */
+
+/* ══════════════════════════════════════════════════════════
+   SHARED ORDER COMPONENTS
+   ══════════════════════════════════════════════════════════ */
+
+/* Order status badge helpers */
+.status-received  { background: var(--clr-info-bg);    color: var(--clr-info);    border-color: rgba(96,165,250,0.2); }
+.status-shipping  { background: var(--clr-warn-bg);    color: var(--clr-warn);    border-color: rgba(251,191,36,0.2); }
+.status-delivered { background: var(--clr-success-bg); color: var(--clr-success); border-color: rgba(74,222,128,0.2); }
+.status-cancelled { background: var(--clr-error-bg);   color: var(--clr-error);   border-color: rgba(248,113,113,0.2); }
+
+/* Order card (mobile-friendly alternative to table) */
+.order-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+
+.order-card:hover {
+    border-color: var(--border-med);
+    box-shadow: var(--shadow-sm);
+}
+
+.order-card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface-2);
+    flex-wrap: wrap;
+}
+
+.order-id {
+    font-family: var(--ff-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.order-id strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.order-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.order-card-body {
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.order-field { display: flex; flex-direction: column; gap: 3px; }
+
+.order-field-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+}
+
+.order-field-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.order-field-value.mono {
+    font-family: var(--ff-mono);
+    color: var(--gold);
+}
+
+.order-card-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ══════════════════════════════════════════════════════════
+   USER ORDER STATUS PAGE
+   ══════════════════════════════════════════════════════════ */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Status timeline strip */
+.status-timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+}
+
+.timeline-step {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+.timeline-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-surface-2);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: all var(--t-base);
+    position: relative;
+    z-index: 1;
+}
+
+.timeline-dot svg { opacity: 0.4; }
+
+.timeline-dot.done {
+    border-color: var(--clr-success);
+    background: var(--clr-success-bg);
+    color: var(--clr-success);
+}
+
+.timeline-dot.done svg { opacity: 1; }
+
+.timeline-dot.active {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+    color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(236,175,90,0.1);
+}
+
+.timeline-dot.active svg { opacity: 1; }
+
+.timeline-line {
+    height: 2px;
+    width: 48px;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background var(--t-base);
+}
+
+.timeline-line.done { background: var(--clr-success); }
+
+.timeline-label-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 80px;
+}
+
+.timeline-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.timeline-label.active { color: var(--gold); }
+.timeline-label.done   { color: var(--clr-success); }
+
+/* ══════════════════════════════════════════════════════════
+   VENDOR ORDER MANAGEMENT (update status)
+   ══════════════════════════════════════════════════════════ */
+.vendor-orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Inline status update form */
+.status-update-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.status-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.status-radio-option {
+    position: relative;
+}
+
+.status-radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+
+.status-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--t-base);
+    white-space: nowrap;
+}
+
+.status-radio-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    opacity: 0.5;
+}
+
+.status-radio-option input:checked + .status-radio-label {
+    border-color: currentColor;
+}
+
+/* Each status has its own colour */
+.status-radio-option.opt-received input:checked + .status-radio-label {
+    color: var(--clr-info);
+    background: var(--clr-info-bg);
+    border-color: rgba(96,165,250,0.3);
+}
+
+.status-radio-option.opt-shipping input:checked + .status-radio-label {
+    color: var(--clr-warn);
+    background: var(--clr-warn-bg);
+    border-color: rgba(251,191,36,0.3);
+}
+
+.status-radio-option.opt-delivered input:checked + .status-radio-label {
+    color: var(--clr-success);
+    background: var(--clr-success-bg);
+    border-color: rgba(74,222,128,0.3);
+}
+
+.status-radio-option:hover .status-radio-label {
+    border-color: var(--border-med);
+    color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADMIN ORDERS TABLE VIEW
+   ══════════════════════════════════════════════════════════ */
+.admin-orders-table .table-wrap {
+    background: var(--bg-surface);
+}
+
+/* Inline status dropdown for admin */
+.admin-status-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-status-select {
+    padding: 6px 28px 6px 10px;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--ff-body);
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a556b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color var(--t-base);
+}
+
+.admin-status-select:focus {
+    border-color: var(--border-focus);
+}
+
+.admin-status-btn {
+    padding: 6px 12px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(236,175,90,0.2);
+    border-radius: var(--radius-sm);
+    color: var(--gold);
+    font-family: var(--ff-body);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--t-base);
+}
+
+.admin-status-btn:hover {
+    background: rgba(236,175,90,0.2);
+    border-color: var(--gold);
+}
+
+/* ══════════════════════════════════════════════════════════
+   FILTER / SEARCH BAR (shared)
+   ══════════════════════════════════════════════════════════ */
+.orders-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.orders-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.orders-search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.orders-search {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--ff-body);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color var(--t-base);
+}
+
+.orders-search::placeholder { color: var(--text-muted); }
+
+.orders-search:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(236,175,90,0.07);
+}
+
+.orders-filter-select {
+    padding: 9px 32px 9px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--ff-body);
+    font-size: 0.875rem;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a556b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    transition: border-color var(--t-base);
+    white-space: nowrap;
+}
+
+.orders-filter-select:focus {
+    border-color: var(--border-focus);
+}
+
+/* ══════════════════════════════════════════════════════════
+   EMPTY / LOADING STATES
+   ══════════════════════════════════════════════════════════ */
+.orders-empty {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 64px 24px;
+    text-align: center;
+}
+
+.orders-empty-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    color: var(--text-muted);
+}
+
+.orders-empty h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.orders-empty p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .order-card-body {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .status-timeline {
+        padding: 12px 16px;
+    }
+
+    .timeline-line { width: 28px; }
+
+    .admin-status-form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-card-body    { grid-template-columns: 1fr; }
+    .order-card-header  { flex-direction: column; align-items: flex-start; }
+    .status-radio-group { flex-direction: column; align-items: flex-start; }
+    .orders-toolbar     { flex-direction: column; align-items: stretch; }
+    .orders-search-wrap { min-width: unset; }
+}
