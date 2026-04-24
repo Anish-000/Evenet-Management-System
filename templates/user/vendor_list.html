@@ -1,37 +1,233 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Select Vendor - Event Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendors – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Select Vendor</h1>
-        <div>
-            <a href="/user/dashboard" class="back-btn">Dashboard</a>
-            <a href="/logout" class="logout-btn">Logout</a>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('user_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('user_vendors') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('view_cart') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="9" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="20" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Cart
+                </a>
+                <a href="{{ url_for('view_guestlist') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Guest List
+                </a>
+                <a href="{{ url_for('user_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Order Status
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <div class="dashboard-container">
-
-        {% if vendors %}
-            {% for vendor in vendors %}
-                <div class="dashboard-card">
-                    <h3>{{ vendor.name }}</h3>
-                    <a href="/user/vendor_products/{{ vendor.id }}" class="dashboard-btn">
-                        View Products
-                    </a>
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
                 </div>
             {% endfor %}
-        {% else %}
-            <p class="empty-message">No vendors available.</p>
-        {% endif %}
-
+        {% endwith %}
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
+
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Browse <em>Vendors</em></h1>
+                        <p class="page-subtitle">
+                            {{ vendors|length }} vendor{{ 's' if vendors|length != 1 else '' }} available
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Category filter tabs -->
+                <div class="category-tabs fade-in fade-in-delay-1" id="category-tabs">
+                    <button class="category-tab active" data-category="">All</button>
+                    <button class="category-tab" data-category="Catering">🍽️ Catering</button>
+                    <button class="category-tab" data-category="Florist">🌸 Florist</button>
+                    <button class="category-tab" data-category="Decoration">🎨 Decoration</button>
+                    <button class="category-tab" data-category="Lighting">💡 Lighting</button>
+                </div>
+
+                {% if vendors %}
+                    <div class="vendors-grid fade-in fade-in-delay-2" id="vendors-grid">
+                        {% for vendor in vendors %}
+                        <div
+                            class="vendor-card"
+                            data-category="{{ vendor.category or '' }}"
+                        >
+                            <div class="vendor-card-header">
+                                <div class="vendor-avatar">
+                                    {{ vendor.name[0].upper() }}
+                                </div>
+                                <div class="vendor-info">
+                                    <p class="vendor-name">{{ vendor.name }}</p>
+                                    {% if vendor.category %}
+                                        <span class="vendor-category">
+                                            {% if vendor.category == 'Catering' %}🍽️
+                                            {% elif vendor.category == 'Florist' %}🌸
+                                            {% elif vendor.category == 'Decoration' %}🎨
+                                            {% elif vendor.category == 'Lighting' %}💡
+                                            {% endif %}
+                                            {{ vendor.category }}
+                                        </span>
+                                    {% else %}
+                                        <span class="vendor-category">🏪 General</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="vendor-card-footer">
+                                <a
+                                    href="{{ url_for('vendor_products_for_user', vendor_id=vendor.id) }}"
+                                    class="vendor-shop-btn"
+                                >
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    Shop Items
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                {% else %}
+                    <div class="empty-state fade-in fade-in-delay-2">
+                        <div class="empty-state-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <h3>No vendors yet</h3>
+                        <p>Check back soon — vendors will appear here once they're added.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /* Nav toggle */
+        const toggle = document.getElementById('nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (toggle && links) toggle.addEventListener('click', () => links.classList.toggle('open'));
+
+        /* Flash dismiss */
+        document.querySelectorAll('.flash').forEach(f => {
+            setTimeout(() => f.remove(), 5000);
+            const btn = f.querySelector('.flash-close');
+            if (btn) btn.addEventListener('click', () => f.remove());
+        });
+
+        /* Category filter tabs */
+        const tabs        = document.querySelectorAll('.category-tab');
+        const vendorCards = document.querySelectorAll('.vendor-card');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                /* Active state */
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const selected = tab.dataset.category;
+
+                vendorCards.forEach(card => {
+                    if (!selected || card.dataset.category === selected) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

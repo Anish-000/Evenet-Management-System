@@ -1,64 +1,305 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Manage Orders - Vendor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Manage Orders</h1>
-        <div>
-            <a href="/vendor/dashboard" class="back-btn">Dashboard</a>
-            <a href="/logout" class="logout-btn">Logout</a>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('vendor_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('vendor_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('vendor_products') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Your Items
+                </a>
+                <a href="{{ url_for('add_product') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Add New Item
+                </a>
+                <a href="{{ url_for('vendor_orders') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Transactions
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
+    </nav>
+
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
     </div>
 
-    <div class="table-container">
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
 
-        {% if orders %}
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Total Amount</th>
-                    <th>Current Status</th>
-                    <th>Update Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>#{{ order.id }}</td>
-                    <td>₹{{ order.total_amount }}</td>
-                    <td>
-                        <span class="status-badge">
-                            {{ order.status }}
-                        </span>
-                    </td>
-                    <td>
-                        <form method="POST" action="/vendor/update_status/{{ order.id }}" class="inline-form">
-                            <select name="status" class="small-select">
-                                <option value="Received">Received</option>
-                                <option value="Ready for Shipping">Ready for Shipping</option>
-                                <option value="Out for Delivery">Out for Delivery</option>
-                            </select>
-                            <button type="submit" class="primary-btn small-btn">
-                                Update
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <p class="empty-message">No orders available.</p>
-        {% endif %}
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title"><em>Transactions</em></h1>
+                        <p class="page-subtitle">
+                            {{ orders|length }} order{{ 's' if orders|length != 1 else '' }} received
+                        </p>
+                    </div>
+                </div>
 
+                <!-- Search bar -->
+                <div class="orders-toolbar fade-in fade-in-delay-1">
+                    <div class="orders-search-wrap">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <input
+                            type="text"
+                            class="orders-search"
+                            id="orders-search"
+                            placeholder="Search by customer name or order ID…"
+                        >
+                    </div>
+                    <select class="orders-filter-select" id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="Received">Received</option>
+                        <option value="Ready for Shipping">Ready for Shipping</option>
+                        <option value="Out For Delivery">Out For Delivery</option>
+                    </select>
+                </div>
+
+                {% if orders %}
+                    <div class="vendor-orders-list fade-in fade-in-delay-2" id="orders-list">
+                        {% for order in orders %}
+                        <div class="order-card" data-status="{{ order.status }}" data-search="{{ order.user_name|lower }} {{ order.id }}">
+
+                            <div class="order-card-header">
+                                <div>
+                                    <span class="order-id">Order <strong>#{{ order.id }}</strong></span>
+                                    <span class="order-date" style="margin-left:12px;">
+                                        {{ order.created_at[:10] if order.created_at else '—' }}
+                                    </span>
+                                </div>
+                                {% set s = order.status %}
+                                {% if s == 'Received' %}
+                                    <span class="badge badge-received">{{ s }}</span>
+                                {% elif s == 'Ready for Shipping' %}
+                                    <span class="badge badge-shipping">{{ s }}</span>
+                                {% elif s == 'Out For Delivery' %}
+                                    <span class="badge badge-delivered">{{ s }}</span>
+                                {% else %}
+                                    <span class="badge badge-gold">{{ s }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="order-card-body">
+                                <div class="order-field">
+                                    <span class="order-field-label">Customer</span>
+                                    <span class="order-field-value">{{ order.user_name }}</span>
+                                </div>
+                                <div class="order-field">
+                                    <span class="order-field-label">Email</span>
+                                    <span class="order-field-value">{{ order.user_email }}</span>
+                                </div>
+                                <div class="order-field">
+                                    <span class="order-field-label">Total</span>
+                                    <span class="order-field-value mono">₹{{ "%.2f"|format(order.total_amount) }}</span>
+                                </div>
+                                <div class="order-field">
+                                    <span class="order-field-label">Payment</span>
+                                    <span class="order-field-value">{{ order.payment_method }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Status update form -->
+                            <div class="order-card-footer">
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('update_status', order_id=order.id) }}"
+                                    class="status-update-form"
+                                >
+                                    <div class="status-radio-group">
+
+                                        <label class="status-radio-option opt-received">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="Received"
+                                                {{ 'checked' if order.status == 'Received' else '' }}
+                                            >
+                                            <span class="status-radio-label">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                Received
+                                            </span>
+                                        </label>
+
+                                        <label class="status-radio-option opt-shipping">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="Ready for Shipping"
+                                                {{ 'checked' if order.status == 'Ready for Shipping' else '' }}
+                                            >
+                                            <span class="status-radio-label">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                                    <rect x="1" y="3" width="15" height="13" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                                                    <path d="M16 8h4l3 3v5h-7V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                    <circle cx="5.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                                                    <circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                                                </svg>
+                                                Ready for Shipping
+                                            </span>
+                                        </label>
+
+                                        <label class="status-radio-option opt-delivered">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="Out For Delivery"
+                                                {{ 'checked' if order.status == 'Out For Delivery' else '' }}
+                                            >
+                                            <span class="status-radio-label">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                Out For Delivery
+                                            </span>
+                                        </label>
+
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        Update
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                {% else %}
+                    <div class="orders-empty fade-in fade-in-delay-2">
+                        <div class="orders-empty-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>No orders yet</h3>
+                        <p>Orders for your products will appear here once customers start purchasing.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </main>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        /* Nav toggle */
+        const toggle = document.getElementById('nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (toggle && links) toggle.addEventListener('click', () => links.classList.toggle('open'));
+
+        /* Flash dismiss */
+        document.querySelectorAll('.flash').forEach(f => {
+            setTimeout(() => f.remove(), 5000);
+            const btn = f.querySelector('.flash-close');
+            if (btn) btn.addEventListener('click', () => f.remove());
+        });
+
+        /* Search + filter */
+        const searchInput  = document.getElementById('orders-search');
+        const statusFilter = document.getElementById('status-filter');
+        const orderCards   = document.querySelectorAll('.order-card');
+
+        function filterOrders() {
+            const query  = searchInput ? searchInput.value.toLowerCase() : '';
+            const status = statusFilter ? statusFilter.value : '';
+
+            orderCards.forEach(card => {
+                const searchText = card.dataset.search || '';
+                const cardStatus = card.dataset.status || '';
+
+                const matchSearch = !query  || searchText.includes(query);
+                const matchStatus = !status || cardStatus === status;
+
+                card.style.display = (matchSearch && matchStatus) ? '' : 'none';
+            });
+        }
+
+        if (searchInput)  searchInput.addEventListener('input', filterOrders);
+        if (statusFilter) statusFilter.addEventListener('change', filterOrders);
+    </script>
 
 </body>
 </html>

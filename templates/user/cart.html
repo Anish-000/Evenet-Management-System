@@ -1,60 +1,294 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Your Cart - Event Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Your Cart</h1>
-        <a href="/logout" class="logout-btn">Logout</a>
-    </div>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('user_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
 
-    <div class="table-container">
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('user_vendors') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('view_cart') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="9" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="20" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Cart
+                </a>
+                <a href="{{ url_for('view_guestlist') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Guest List
+                </a>
+                <a href="{{ url_for('user_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Order Status
+                </a>
+            </div>
 
-        {% if cart_items %}
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart_items %}
-                <tr>
-                    <td>{{ item.name }}</td>
-                    <td>₹{{ item.price }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>₹{{ item.price * item.quantity }}</td>
-                    <td>
-                        <a href="/user/remove_from_cart/{{ item.id }}" class="danger-btn small-btn">
-                            Remove
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="cart-summary">
-            <h3>Total Amount: ₹{{ total }}</h3><br>
-            <a href="/user/checkout" class="primary-btn">Proceed to Checkout</a>
-            <a href="/user/vendors" class="secondary-btn">Continue Shopping</a>
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
+    </nav>
 
-        {% else %}
-            <p class="empty-message">Your cart is empty.</p><br>
-            <a href="/user/vendors" class="primary-btn">Browse Vendors</a>
-        {% endif %}
-
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
 
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Shopping <em>Cart</em></h1>
+                        <p class="page-subtitle">
+                            <span id="cart-count">{{ cart_items|length }} item{{ 's' if cart_items|length != 1 else '' }}</span>
+                        </p>
+                    </div>
+                    <a href="{{ url_for('user_vendors') }}" class="btn btn-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                            <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Continue Shopping
+                    </a>
+                </div>
+
+                {% if cart_items %}
+                <div class="cart-layout fade-in fade-in-delay-1">
+
+                    <!-- ── Cart Items ───────────────────────── -->
+                    <div>
+                        <div class="cart-table-wrap">
+                            <div class="cart-table-header">
+                                <span class="cart-table-title">Your Items</span>
+                                <span class="cart-count">{{ cart_items|length }} item{{ 's' if cart_items|length != 1 else '' }}</span>
+                            </div>
+
+                            {% for item in cart_items %}
+                            <div class="cart-item">
+
+                                <!-- Image -->
+                                {% if item.image %}
+                                    <img
+                                        src="{{ url_for('static', filename='uploads/' + item.image) }}"
+                                        alt="{{ item.name }}"
+                                        class="cart-item-img"
+                                    >
+                                {% else %}
+                                    <div class="cart-item-img-placeholder">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="1.5"/>
+                                            <polyline points="21,15 16,10 5,21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Info -->
+                                <div class="cart-item-info">
+                                    <p class="cart-item-name">{{ item.name }}</p>
+                                    <p class="cart-item-unit-price"
+                                       data-unit-price="{{ item.price }}">
+                                        ₹{{ "%.2f"|format(item.price) }} / unit
+                                    </p>
+                                </div>
+
+                                <!-- Quantity control -->
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('update_cart', cart_id=item.id) }}"
+                                    class="qty-update-form"
+                                    style="display:none"
+                                >
+                                    <input type="hidden" name="quantity" value="{{ item.quantity }}">
+                                </form>
+
+                                <div class="qty-control">
+                                    <button type="button" class="qty-btn" data-action="minus" aria-label="Decrease">−</button>
+                                    <input
+                                        type="number"
+                                        class="qty-input"
+                                        value="{{ item.quantity }}"
+                                        min="1"
+                                        max="99"
+                                        aria-label="Quantity"
+                                    >
+                                    <button type="button" class="qty-btn" data-action="plus" aria-label="Increase">+</button>
+                                </div>
+
+                                <!-- Item total -->
+                                <span class="cart-item-total">
+                                    ₹{{ "%.2f"|format(item.price * item.quantity) }}
+                                </span>
+
+                                <!-- Remove -->
+                                <button
+                                    type="button"
+                                    class="cart-item-remove"
+                                    data-href="{{ url_for('remove_from_cart', id=item.id) }}"
+                                    aria-label="Remove {{ item.name }}"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </button>
+
+                            </div>
+                            {% endfor %}
+
+                            <!-- Delete All footer -->
+                            <div class="cart-table-footer">
+                                <a
+                                    href="{{ url_for('clear_cart') }}"
+                                    class="btn btn-danger btn-sm"
+                                    id="delete-all-btn"
+                                    data-href="{{ url_for('clear_cart') }}"
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                    Delete All
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Order Summary ────────────────────── -->
+                    <div class="cart-summary">
+                        <div class="cart-summary-header">
+                            <p class="cart-summary-title">Order Summary</p>
+                        </div>
+                        <div class="cart-summary-body">
+                            {% for item in cart_items %}
+                            <div class="summary-row">
+                                <span>{{ item.name }} × {{ item.quantity }}</span>
+                                <span>₹{{ "%.2f"|format(item.price * item.quantity) }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="summary-total">
+                                <span>Grand Total</span>
+                                <span class="summary-total-amount" id="grand-total">
+                                    ₹{{ "%.2f"|format(total) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="cart-summary-footer">
+                            <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-full">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Proceed to Checkout
+                            </a>
+                            <a href="{{ url_for('user_vendors') }}" class="btn btn-secondary btn-full">
+                                Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                {% else %}
+                    <div class="empty-state fade-in fade-in-delay-1">
+                        <div class="empty-state-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                <circle cx="9" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                                <circle cx="20" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3>Your cart is empty</h3>
+                        <p>Browse vendors and add products to your cart to get started.</p>
+                        <a href="{{ url_for('user_vendors') }}" class="btn btn-primary">
+                            Browse Vendors
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 </body>
 </html>
